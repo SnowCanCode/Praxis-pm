@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - FLUX</title>
+    
+    <!-- Lexend Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="src/css/styles.css">
+</head>
+<body>
+    <div id="app">
+        <header class="header">
+            <div class="logo">
+                <h1>FLUX<sup>™</sup></h1>
+                <span class="tagline">by Aegis Global Services</span>
+            </div>
+            <nav class="nav">
+                <span id="user-email" style="margin-right: 1rem; color: var(--text-secondary);"></span>
+                <button class="btn-secondary" id="signout-btn">Sign Out</button>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard-container">
+                <h1>Welcome to FLUX!</h1>
+                <p>You're successfully signed in. Dashboard coming soon!</p>
+                
+                <div class="dashboard-placeholder">
+                    <h2>🎉 Authentication Working!</h2>
+                    <p>Your account is set up and ready to go.</p>
+                    <p>We'll build the project management features next.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDDUppdhO3ghw2DlsRf2qAeyj4CtK-GUfo",
+            authDomain: "flux-pm-d7c64.firebaseapp.com",
+            projectId: "flux-pm-d7c64",
+            storageBucket: "flux-pm-d7c64.firebasestorage.app",
+            messagingSenderId: "962275271828",
+            appId: "1:962275271828:web:192e68f6f191bfc67b8081",
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Check if user is signed in
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                document.getElementById('user-email').textContent = user.email;
+            } else {
+                // No user signed in, redirect to login
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Handle sign out
+        document.getElementById('signout-btn').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+        });
+    </script>
+</body>
+</html>

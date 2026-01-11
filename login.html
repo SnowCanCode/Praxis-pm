@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - FLUX by Aegis Global Services</title>
+    
+    <!-- Lexend Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="src/css/styles.css">
+</head>
+<body>
+    <div id="app">
+        <header class="header">
+            <div class="logo">
+                <a href="index.html" style="text-decoration: none; color: inherit;">
+                    <h1>FLUX<sup>™</sup></h1>
+                    <span class="tagline">by Aegis Global Services</span>
+                </a>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="auth-container">
+                <h1>Welcome Back</h1>
+                <p class="auth-subtitle">Sign in to continue to FLUX</p>
+                
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required placeholder="you@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required placeholder="Enter your password">
+                    </div>
+                    
+                    <div id="error-message" class="error-message"></div>
+                    
+                    <button type="submit" class="btn-primary btn-large btn-full">Sign In</button>
+                </form>
+                
+                <p class="auth-footer">
+                    Don't have an account? <a href="signup.html">Sign up</a>
+                </p>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <p><strong>FLUX™</strong> is a trademark of <strong>Aegis Global Services (A.G.S)</strong></p>
+                    <p class="copyright">© 2026 Aegis Global Services. All rights reserved.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="https://discord.gg/YOUR_INVITE_CODE" target="_blank">Join Our Discord</a>
+                    <a href="terms.html">Terms of Service</a>
+                    <a href="privacy.html">Privacy Policy</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            // PASTE YOUR CONFIG HERE
+            apiKey: "AIzaSyDDUppdhO3ghw2DlsRf2qAeyj4CtK-GUfo",
+            authDomain: "flux-pm-d7c64.firebaseapp.com",
+            projectId: "flux-pm-d7c64",
+            storageBucket: "flux-pm-d7c64.firebasestorage.app",
+            messagingSenderId: "962275271828",
+            appId: "1:962275271828:web:192e68f6f191bfc67b8081"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Handle login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+            
+            // Clear previous errors
+            errorMessage.textContent = '';
+            
+            try {
+                // Sign in user
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log('User signed in:', userCredential.user);
+                
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.textContent = 'Invalid email or password';
+            }
+        });
+    </script>
+</body>
+</html>
