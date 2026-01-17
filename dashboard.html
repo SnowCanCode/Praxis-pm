@@ -209,7 +209,7 @@
                 <p class="project-description">${escapeHtml(project.description || 'No description')}</p>
                 <div class="project-card-footer">
                     <span class="project-date">Created ${formatDate(project.createdAt)}</span>
-                    <button class="btn-secondary btn-small" onclick="alert('Project view coming soon!')">Open</button>
+                    <button class="btn-secondary btn-small" onclick="window.location.href='project.html?id=${id}'">Open</button>
                 </div>
             `;
             
