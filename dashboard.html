@@ -1,95 +1,252 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Praxis</title>
-
+    
     <!-- Lexend Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-
-    <link rel="stylesheet" href="src/css/styles.css" />
-  </head>
-  <body>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="src/css/styles.css">
+</head>
+<body>
     <div id="app">
-      <header class="header">
-        <div class="logo">
-          <h1>Praxis<sup>™</sup></h1>
-          <span class="tagline">by Aegis Global Services</span>
-        </div>
-        <nav class="nav">
-          <span
-            id="user-email"
-            style="margin-right: 1rem; color: var(--text-secondary)"
-          ></span>
-          <button class="btn-secondary" id="signout-btn">Sign Out</button>
-        </nav>
-      </header>
+        <header class="header">
+            <div class="logo">
+                <h1>Praxis<sup>™</sup></h1>
+                <span class="tagline">by Aegis Global Services</span>
+            </div>
+            <nav class="nav">
+                <span id="user-email" style="margin-right: 1rem; color: var(--text-secondary);"></span>
+                <button class="btn-secondary" id="signout-btn">Sign Out</button>
+            </nav>
+        </header>
 
-      <main class="main-content">
-        <div class="dashboard-container">
-          <h1>Welcome to Praxis!</h1>
-          <p>You're successfully signed in. Dashboard coming soon!</p>
+        <main class="main-content">
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <h1>Your Projects</h1>
+                    <button class="btn-primary" id="create-project-btn">+ Create Project</button>
+                </div>
 
-          <div class="dashboard-placeholder">
-            <h2>🎉 Authentication Working!</h2>
-            <p>Your account is set up and ready to go.</p>
-            <p>We'll build the project management features next.</p>
-          </div>
+                <div id="projects-grid" class="projects-grid">
+                    <!-- Projects will be loaded here -->
+                </div>
+
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <h2>No projects yet</h2>
+                    <p>Create your first project to get started with Praxis!</p>
+                    <button class="btn-primary btn-large" onclick="document.getElementById('create-project-btn').click()">Create Your First Project</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Create Project Modal -->
+        <div id="create-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Create New Project</h2>
+                    <button class="modal-close" id="close-modal">&times;</button>
+                </div>
+                <form id="create-project-form">
+                    <div class="form-group">
+                        <label for="project-name">Project Name</label>
+                        <input type="text" id="project-name" required placeholder="Enter project name">
+                    </div>
+                    <div class="form-group">
+                        <label for="project-description">Description (optional)</label>
+                        <textarea id="project-description" rows="3" placeholder="What's this project about?"></textarea>
+                    </div>
+                    <div id="modal-error" class="error-message"></div>
+                    <button type="submit" class="btn-primary btn-large btn-full">Create Project</button>
+                </form>
+            </div>
         </div>
-      </main>
     </div>
 
     <!-- Firebase SDK -->
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import {
-        getAuth,
-        onAuthStateChanged,
-        signOut,
-      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-      // Your Firebase configuration
-      const firebaseConfig = {
-        apiKey: "AIzaSyDDUppdhO3ghw2DlsRf2qAeyj4CtK-GUfo",
-        authDomain: "Praxis-pm-d7c64.firebaseapp.com",
-        projectId: "Praxis-pm-d7c64",
-        storageBucket: "Praxis-pm-d7c64.firebasestorage.app",
-        messagingSenderId: "962275271828",
-        appId: "1:962275271828:web:192e68f6f191bfc67b8081",
-      };
+        // Your Firebase configuration
+        const firebaseConfig = {
+            // PASTE YOUR CONFIG HERE
+            apiKey: "AIzaSyDDUppdhO3ghw2DlsRf2qAeyj4CtK-GUfo",
+            authDomain: "flux-pm-d7c64.firebaseapp.com",
+            projectId: "flux-pm-d7c64",
+            storageBucket: "flux-pm-d7c64.firebasestorage.app",
+            messagingSenderId: "962275271828",
+            appId: "G-X2T0GGZYBZ"
+        };
 
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-      // Check if user is signed in
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          // User is signed in
-          document.getElementById("user-email").textContent = user.email;
-        } else {
-          // No user signed in, redirect to login
-          window.location.href = "login.html";
-        }
-      });
+        let currentUser = null;
 
-      // Handle sign out
-      document
-        .getElementById("signout-btn")
-        .addEventListener("click", async () => {
-          try {
-            await signOut(auth);
-            window.location.href = "index.html";
-          } catch (error) {
-            console.error("Error signing out:", error);
-          }
+        // Check if user is signed in
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('user-email').textContent = user.email;
+                loadProjects();
+            } else {
+                window.location.href = 'login.html';
+            }
         });
+
+        // Handle sign out
+        document.getElementById('signout-btn').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+        });
+
+        // Modal controls
+        const modal = document.getElementById('create-modal');
+        const createBtn = document.getElementById('create-project-btn');
+        const closeBtn = document.getElementById('close-modal');
+
+        createBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+            document.getElementById('create-project-form').reset();
+        });
+
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                document.getElementById('create-project-form').reset();
+            }
+        });
+
+        // Create project
+        document.getElementById('create-project-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('project-name').value;
+            const description = document.getElementById('project-description').value;
+            const errorMsg = document.getElementById('modal-error');
+            
+            errorMsg.textContent = '';
+            
+            try {
+                await addDoc(collection(db, 'projects'), {
+                    name: name,
+                    description: description,
+                    userId: currentUser.uid,
+                    createdAt: serverTimestamp()
+                });
+                
+                modal.style.display = 'none';
+                document.getElementById('create-project-form').reset();
+                loadProjects();
+            } catch (error) {
+                console.error('Error creating project:', error);
+                errorMsg.textContent = 'Failed to create project. Please try again.';
+            }
+        });
+
+        // Load projects
+        async function loadProjects() {
+            const projectsGrid = document.getElementById('projects-grid');
+            const emptyState = document.getElementById('empty-state');
+            
+            projectsGrid.innerHTML = '<p style="color: var(--text-secondary);">Loading projects...</p>';
+            
+            try {
+                const q = query(
+                    collection(db, 'projects'),
+                    where('userId', '==', currentUser.uid),
+                    orderBy('createdAt', 'desc')
+                );
+                
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    projectsGrid.innerHTML = '';
+                    emptyState.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'none';
+                    projectsGrid.innerHTML = '';
+                    
+                    querySnapshot.forEach((doc) => {
+                        const project = doc.data();
+                        const projectCard = createProjectCard(doc.id, project);
+                        projectsGrid.appendChild(projectCard);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                projectsGrid.innerHTML = '<p style="color: var(--accent-red);">Failed to load projects.</p>';
+            }
+        }
+
+        // Create project card element
+        function createProjectCard(id, project) {
+            const card = document.createElement('div');
+            card.className = 'project-card';
+            
+            card.innerHTML = `
+                <div class="project-card-header">
+                    <h3>${escapeHtml(project.name)}</h3>
+                    <button class="btn-delete" data-id="${id}">×</button>
+                </div>
+                <p class="project-description">${escapeHtml(project.description || 'No description')}</p>
+                <div class="project-card-footer">
+                    <span class="project-date">Created ${formatDate(project.createdAt)}</span>
+                    <button class="btn-secondary btn-small" onclick="alert('Project view coming soon!')">Open</button>
+                </div>
+            `;
+            
+            // Delete button handler
+            card.querySelector('.btn-delete').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (confirm('Delete this project? This cannot be undone.')) {
+                    await deleteProject(id);
+                }
+            });
+            
+            return card;
+        }
+
+        // Delete project
+        async function deleteProject(id) {
+            try {
+                await deleteDoc(doc(db, 'projects', id));
+                loadProjects();
+            } catch (error) {
+                console.error('Error deleting project:', error);
+                alert('Failed to delete project');
+            }
+        }
+
+        // Helper functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return 'Just now';
+            const date = timestamp.toDate();
+            return date.toLocaleDateString();
+        }
     </script>
-  </body>
+</body>
 </html>
