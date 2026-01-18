@@ -74,6 +74,28 @@
                 </form>
             </div>
         </div>
+
+        <!-- Edit Task Modal -->
+        <div id="edit-task-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Edit Task</h2>
+                    <button class="modal-close" id="close-edit-modal">&times;</button>
+                </div>
+                <form id="edit-task-form">
+                    <div class="form-group">
+                        <label for="edit-task-title">Task Title</label>
+                        <input type="text" id="edit-task-title" required placeholder="What needs to be done?">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-task-description">Description (optional)</label>
+                        <textarea id="edit-task-description" rows="3" placeholder="Add details..."></textarea>
+                    </div>
+                    <div id="edit-task-error" class="error-message"></div>
+                    <button type="submit" class="btn-primary btn-large btn-full">Save Changes</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase SDK -->
@@ -84,7 +106,6 @@
 
         // Your Firebase configuration
         const firebaseConfig = {
-            // PASTE YOUR CONFIG HERE
             apiKey: "AIzaSyDDUppdhO3ghw2DlsRf2qAeyj4CtK-GUfo",
             authDomain: "flux-pm-d7c64.firebaseapp.com",
             projectId: "flux-pm-d7c64",
@@ -160,7 +181,7 @@
             }
         }
 
-        // Modal controls
+        // Add Task Modal controls
         const taskModal = document.getElementById('task-modal');
         const addTaskBtn = document.getElementById('add-task-btn');
         const closeTaskBtn = document.getElementById('close-task-modal');
@@ -210,6 +231,60 @@
             }
         });
 
+        // Edit Task Modal controls
+        const editTaskModal = document.getElementById('edit-task-modal');
+        const closeEditBtn = document.getElementById('close-edit-modal');
+        let currentEditTaskId = null;
+
+        closeEditBtn.addEventListener('click', () => {
+            editTaskModal.style.display = 'none';
+            document.getElementById('edit-task-form').reset();
+            currentEditTaskId = null;
+        });
+
+        editTaskModal.addEventListener('click', (e) => {
+            if (e.target === editTaskModal) {
+                editTaskModal.style.display = 'none';
+                document.getElementById('edit-task-form').reset();
+                currentEditTaskId = null;
+            }
+        });
+
+        // Open edit modal with pre-filled data
+        function openEditModal(taskId, task) {
+            currentEditTaskId = taskId;
+            document.getElementById('edit-task-title').value = task.title;
+            document.getElementById('edit-task-description').value = task.description || '';
+            document.getElementById('edit-task-error').textContent = '';
+            editTaskModal.style.display = 'flex';
+        }
+
+        // Handle edit form submission
+        document.getElementById('edit-task-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('edit-task-title').value;
+            const description = document.getElementById('edit-task-description').value;
+            const errorMsg = document.getElementById('edit-task-error');
+            
+            errorMsg.textContent = '';
+            
+            try {
+                await updateDoc(doc(db, 'tasks', currentEditTaskId), {
+                    title: title,
+                    description: description
+                });
+                
+                editTaskModal.style.display = 'none';
+                document.getElementById('edit-task-form').reset();
+                currentEditTaskId = null;
+                loadTasks();
+            } catch (error) {
+                console.error('Error updating task:', error);
+                errorMsg.textContent = 'Failed to update task. Please try again.';
+            }
+        });
+
         // Load tasks
         async function loadTasks() {
             const tasksList = document.getElementById('tasks-list');
@@ -249,7 +324,7 @@
         function createTaskElement(id, task) {
             const taskDiv = document.createElement('div');
             taskDiv.className = `task-item ${task.completed ? 'task-completed' : ''}`;
-            
+    
             taskDiv.innerHTML = `
                 <div class="task-checkbox-container">
                     <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-id="${id}">
@@ -258,21 +333,29 @@
                     <h4 class="task-title">${escapeHtml(task.title)}</h4>
                     ${task.description ? `<p class="task-desc">${escapeHtml(task.description)}</p>` : ''}
                 </div>
-                <button class="btn-delete task-delete" data-id="${id}">×</button>
+                <div class="task-actions">
+                    <button class="btn-edit task-edit" data-id="${id}" title="Edit task">✏️</button>
+                    <button class="btn-delete task-delete" data-id="${id}" title="Delete task">×</button>
+                </div>
             `;
-            
+    
             // Checkbox handler
             taskDiv.querySelector('.task-checkbox').addEventListener('change', async (e) => {
                 await toggleTask(id, e.target.checked);
             });
-            
+    
+            // Edit button handler
+            taskDiv.querySelector('.task-edit').addEventListener('click', () => {
+                openEditModal(id, task);
+            });
+    
             // Delete button handler
             taskDiv.querySelector('.task-delete').addEventListener('click', async () => {
                 if (confirm('Delete this task?')) {
                     await deleteTask(id);
                 }
             });
-            
+    
             return taskDiv;
         }
 

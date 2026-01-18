@@ -632,3 +632,26 @@ sup {
 .empty-tasks h3 {
     font-size: 1.2rem;
 }
+
+/* Task Actions */
+.task-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.btn-edit {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    transition: all 0.2s ease;
+    border-radius: 2px;
+}
+
+.btn-edit:hover {
+    background: var(--bg-tertiary);
+    color: var(--accent-blue);
+}
